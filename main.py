@@ -35,6 +35,7 @@ blocked_ips = [
     "192.168.1.100"
 ]
 
+
 def show_logs():
     try:
         log_display = subprocess.check_output(['tail', '-n', '10', '/var/log/apache2/access.log'])
@@ -62,16 +63,16 @@ def rate_limiting():
         # Update last request time
         last_request_time = datetime.now()
 
-def is_blocked_ip(ip_address):
-    # Checks if an IP address is in the blocked list.
 
-    # Set to True for testing w/ protection, False otherwise
-    block_for_testing = True
+def is_blocked_ip(ip_address, block_for_testing=False):
+    # Checks if an IP address is in the blocked list.
+    # Set block_for_testing to True for testing w/ protection, False otherwise
 
     # Only check for blocking if not testing with protection
-    if not block_for_testing:
+    if block_for_testing:
         try:
-            ip = ipaddress.ip_address(ip_address)  # Parse IP address
+            # Parse IP address
+            ip = ipaddress.ip_address(ip_address)
             for blocked_range in blocked_ips:
                 blocked_network = ipaddress.ip_network(blocked_range)
                 if ip in blocked_network:
@@ -81,6 +82,10 @@ def is_blocked_ip(ip_address):
             print(f"Invalid IP address: {ip_address}")
             # Treat invalid IPs as blocked
             return True
+    else:
+        # Always block for Testing purposes
+        return True
+
 
 def http_flood(target_url, num_of_requests):
     # Get the client's IP address
@@ -110,9 +115,6 @@ def http_flood(target_url, num_of_requests):
 if __name__ == "__main__":
     target_url = "https://10.0.2.15/real-estate-html-template/index.html"
     num_of_requests = 100
-
-    # Set to True for testing w/ protection, False otherwise
-    is_blocked_ip.block_for_testing = True
 
     print(f"Starting http flood, targeting {target_url}")
 
