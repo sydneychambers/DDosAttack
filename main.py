@@ -64,7 +64,7 @@ def rate_limiting():
         last_request_time = datetime.now()
 
 
-def is_blocked_ip(ip_address, block_for_testing=False):
+def ip_filtering(ip_address, block_for_testing=False):
     # Checks if an IP address is in the blocked list.
     # Set block_for_testing to True for testing w/ protection, False otherwise
 
@@ -92,7 +92,7 @@ def http_flood(target_url, num_of_requests):
     client_ip = requests.get('https://api.ipify.org').text
 
     # Check if the client's IP is blocked
-    if is_blocked_ip(client_ip):
+    if ip_filtering(client_ip):
         print(f"Blocking request from suspicious IP: {client_ip}")
         return
 
