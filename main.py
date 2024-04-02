@@ -29,11 +29,6 @@ user_agents = [
     "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26"
 ]
 
-'''blocked_ips = [
-    "10.0.2.15",
-    "192.168.1.100"
-]'''
-
 
 def show_logs():
     try:
@@ -93,7 +88,7 @@ def http_flood(target_url, num_of_requests):
 
 
 if __name__ == "__main__":
-    target_url = "https://10.0.2.15/real-estate-html-template/index.html"
+    target_url = "http://10.0.2.15/"
     num_of_requests = 100
 
     print(f"Starting http flood, targeting {target_url}")
