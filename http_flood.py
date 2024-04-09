@@ -28,6 +28,11 @@ user_agents = [
 
 
 def http_flood(target_url, num_of_requests):
+    # Connection tracking
+    print("Tracking connections...")
+    protection_script.connection_tracking()
+    print("\nConnection tracking finished.")
+
     # Flood the webpage with requests
     for i in range(num_of_requests):
         try:
@@ -59,6 +64,10 @@ def http_flood(target_url, num_of_requests):
         except Exception as e:
             print(f"Error: {str(e)}")
 
+    # Connection tracking
+    print("Tracking connections...")
+    protection_script.connection_tracking()
+    print("\nConnection tracking finsihed.")
 
 if __name__ == "__main__":
     # Target URL for HTTP flood

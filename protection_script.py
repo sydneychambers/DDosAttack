@@ -6,6 +6,7 @@ import hashlib
 import hmac
 import os
 import collections
+import subprocess
 
 # Disable SSL warnings
 import urllib3
@@ -116,10 +117,15 @@ def calculate_time(start, stop):
 
 
 def connection_tracking():
-    global active_connections
-    while True:
-        active_connections = set(threading.enumerate())
-        time.sleep(10)
+    try:
+        # Run netstat command to get active connections
+        output = subprocess.check_output(["netstat", "-atun"], universal_newlines=True)
+        # Print the output (you may process it further)
+        print(output)
+    except subprocess.CalledProcessError as e:
+        # Handle errors if netstat command fails
+        print("Error running netstat:", e)
+    time.sleep(10)
 
 
 def first_check():
