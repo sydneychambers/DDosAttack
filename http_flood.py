@@ -61,7 +61,6 @@ def http_flood(target_url, num_of_requests):
             print(f"Error: {str(e)}")
 
 if __name__ == "__main__":
-    # Start the HTTP flood
     print(f"Starting HTTP flood, targeting {target_url}")
     protection_script.first_check()
     threading.Thread(target=protection_script.connection_tracking, daemon=True).start()

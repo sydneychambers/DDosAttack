@@ -113,5 +113,4 @@ def first_check():
             log_file.write(f"{time.strftime('%Y-%m-%d %H:%M:%S')} - Disconnected\n")
 
 if __name__ == "__main__":
-    first_check()
     threading.Thread(target=connection_tracking, daemon=True).start()
